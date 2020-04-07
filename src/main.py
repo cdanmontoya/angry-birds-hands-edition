@@ -8,6 +8,8 @@ import pymunk as pm
 from characters import Bird
 from level import Level
 
+from hand_detection import get_frame
+from hand_detection import get_hand_position
 
 pygame.init()
 screen = pygame.display.set_mode((1200, 650))
@@ -321,6 +323,8 @@ level.number = 0
 level.load_level()
 
 while running:
+    frame = get_frame()
+    get_hand_position(frame)
     # Input handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
