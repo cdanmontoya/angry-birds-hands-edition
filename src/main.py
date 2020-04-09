@@ -147,11 +147,11 @@ def sling_action():
     global x_mouse
     global y_mouse
     # Fixing bird to the sling rope
-    v = vector((sling_x, sling_y), (x_mouse, y_mouse))
+    v = vector((640, 0), (x_mouse, y_mouse))
     uv = unit_vector(v)
     uv1 = uv[0]
     uv2 = uv[1]
-    mouse_distance = distance(sling_x, sling_y, x_mouse, y_mouse)
+    mouse_distance = distance(640, 0, x_mouse, y_mouse) / 800 * 120
     pu = (uv1*rope_lenght+sling_x, uv2*rope_lenght+sling_y)
     bigger_rope = 102
     x_redbird = x_mouse - 20
@@ -317,14 +317,15 @@ space.add_collision_handler(0, 1).post_solve=post_solve_bird_pig
 space.add_collision_handler(0, 2).post_solve=post_solve_bird_wood
 # pig and wood
 space.add_collision_handler(1, 2).post_solve=post_solve_pig_wood
-load_music()
+# load_music()
 level = Level(pigs, columns, beams, space)
 level.number = 0
 level.load_level()
 
 while running:
+    # Set mouse at the current centroid position
     frame = get_frame()
-    get_hand_position(frame)
+    x_mouse, y_mouse, area = get_hand_position(frame, draw=True)
     # Input handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -406,7 +407,6 @@ while running:
                     game_state = 0
                     bird_path = []
                     score = 0
-    x_mouse, y_mouse = pygame.mouse.get_pos()
     # Draw background
     screen.fill((130, 200, 100))
     screen.blit(background2, (0, -50))
@@ -422,7 +422,7 @@ while running:
             x = 100 - (i*35)
             screen.blit(redbird, (x, 508))
     # Draw sling behavior
-    if mouse_pressed and level.number_of_birds > 0:
+    if level.number_of_birds > 0:
         sling_action()
     else:
         if time.time()*1000 - t1 > 300 and level.number_of_birds > 0:
