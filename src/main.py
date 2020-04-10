@@ -3,7 +3,7 @@ import sys
 import math
 import time
 import pygame
-current_path = os.getcwd()
+current_path = os.chdir('./src')
 import pymunk as pm
 from characters import Bird
 from level import Level
@@ -13,6 +13,7 @@ from hand_detection import get_hand_position
 
 pygame.init()
 screen = pygame.display.set_mode((1200, 650))
+print('este es el os', os.getcwd())
 redbird = pygame.image.load(
     "../resources/images/red-bird3.png").convert_alpha()
 background2 = pygame.image.load(
