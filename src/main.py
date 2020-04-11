@@ -328,33 +328,12 @@ level = Level(pigs, columns, beams, space)
 level.number = 0
 level.load_level()
 while running:
+    print('MArranitos', len(pigs))
     # Set mouse at the current centroid position
     frame = get_frame()
     x_mouse, y_mouse, shoot = get_hand_position(frame)
     x_mouse = 40 + ((x_mouse * 190) / 600)
     y_mouse = 150 + ((y_mouse * 400) / 460)
-
-    """if event.type == pygame.QUIT:
-        running = False
-    elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-        running = False
-    elif event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-        # Toggle wall
-        if wall:
-            space.remove(static_lines1)
-            wall = False
-        else:
-            space.add(static_lines1)
-            wall = True
-
-    elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-        space.gravity = (0.0, -10.0)
-        level.bool_space = True
-    elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
-        space.gravity = (0.0, -700.0)
-        level.bool_space = False
-    if not bird_flying and mouse_action == 2 and 40 < x_mouse < 250 and 150 < y_mouse < 550:
-        mouse_pressed = True"""
 
     if shoot == 2:
         if level.number_of_birds > 0:
@@ -372,46 +351,23 @@ while running:
                 birds.append(bird)
             if level.number_of_birds == 0:
                 t2 = time.time()
-    """if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-        if x_mouse < 60 and 155 > y_mouse > 90:
-            #game_state = 1 ------------------------- genera que aparezca los botones de pausa
-            pass
-        if game_state == 1:
-            if x_mouse > 500 and 200 < y_mouse < 300:
-                # Resume in the paused screen
-                game_state = 0
-            if x_mouse > 500 and y_mouse > 300:
-                # Restart in the paused screen
-                restart()
-                level.load_level()
-                game_state = 0
-                bird_path = []
-        if game_state == 3:
-            # Restart in the failed level screen
-            if 500 < x_mouse < 620 and y_mouse > 450:
-                restart()
-                level.load_level()
-                game_state = 0
-                bird_path = []
-                score = 0
-        if game_state == 4:
-            # Build next level
-            if x_mouse > 610 and y_mouse > 450:
-                restart()
-                level.number += 1
-                game_state = 0
-                level.load_level()
-                score = 0
-                bird_path = []
-                bonus_score_once = True
-            if 610 > x_mouse > 500 and y_mouse > 450:
-                # Restart in the level cleared screen
-                restart()
-                level.load_level()
-                game_state = 0
-                bird_path = []
-                score = 0
-      """
+
+    if shoot == 4 and len(pigs) == 0:
+        # Build next level
+        restart()
+        level.number += 1
+        game_state = 0
+        level.load_level()
+        score = 0
+        bird_path = []
+        bonus_score_once = True
+
+    if shoot == 4 and len(birds) == 0 and len(pigs) != 0:
+        restart()
+        level.load_level()
+        game_state = 0
+        bird_path = []
+        score = 0
 
     # Draw background
     screen.fill((130, 200, 100))

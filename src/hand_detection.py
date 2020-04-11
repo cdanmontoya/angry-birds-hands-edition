@@ -7,7 +7,7 @@ cap = cv2.VideoCapture(0)
 # Se define el intervalo de color que se va a detectar
 low_yellow = np.array([20, 100, 100], np.uint8)
 high_yellow = np.array([30, 255, 255], np.uint8)
-count = [0, 0]
+count = [0, 0]          # Esta variable es como una doble bandera para definir las acciones que se realizan
 
 
 def get_hand_position(frame):
@@ -71,7 +71,7 @@ def get_hand_position(frame):
         hull = cv2.convexHull(approx, returnPoints=False)
         defects = cv2.convexityDefects(approx, hull)
 
-        # l = numero de dedos
+        # fingers = numero de dedos
         fingers = 0
 
         # code for finding no. of defects due to fingers
@@ -107,11 +107,13 @@ def get_hand_position(frame):
                     cv2.putText(frame, 'No se detectó una mano', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                     shoot_bird = 0
                 else:
-                    if arearatio < 12:  # PAra reconocer que no esta abierta
+                    if arearatio < 12:  # Para reconocer que no esta abierta
                         cv2.putText(frame, 'Arrastrando', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                         shoot_bird = 1
                         count[0] = 1
-
+            elif fingers == 3:
+                cv2.putText(frame, 'Avanzanr de nivel', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                shoot_bird = 4
             elif fingers == 5 and count == [1, 2]:  # Para reconocer la mano abierta
                 cv2.putText(frame, 'Disparando', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 count = [0, 0]
