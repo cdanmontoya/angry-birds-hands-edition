@@ -153,7 +153,7 @@ def sling_action():
     uv = unit_vector(v)
     uv1 = uv[0]
     uv2 = uv[1]
-    mouse_distance = distance(135, 450, x_mouse, y_mouse)# / 800 * 120
+    mouse_distance = distance(135, 450, x_mouse, y_mouse)  # / 800 * 120
     pu = (uv1 * rope_lenght + sling_x, uv2 * rope_lenght + sling_y)
     bigger_rope = 102
     x_redbird = x_mouse - 20
@@ -327,15 +327,13 @@ space.add_collision_handler(1, 2).post_solve = post_solve_pig_wood
 level = Level(pigs, columns, beams, space)
 level.number = 0
 level.load_level()
-
 while running:
     # Set mouse at the current centroid position
     frame = get_frame()
-    x_mouse, y_mouse, mouse_action = get_hand_position(frame, draw=True)
+    x_mouse, y_mouse, shoot = get_hand_position(frame)
     x_mouse = 40 + ((x_mouse * 190) / 600)
     y_mouse = 150 + ((y_mouse * 400) / 460)
 
-    #print('Esta es la acción ', mouse_action)
     """if event.type == pygame.QUIT:
         running = False
     elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -354,14 +352,11 @@ while running:
         level.bool_space = True
     elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
         space.gravity = (0.0, -700.0)
-        level.bool_space = False"""
-    if mouse_action and 100 < x_mouse < 250 and 370 < y_mouse < 550:
-        mouse_pressed = True
+        level.bool_space = False
+    if not bird_flying and mouse_action == 2 and 40 < x_mouse < 250 and 150 < y_mouse < 550:
+        mouse_pressed = True"""
 
-    if mouse_action and mouse_pressed: #and not bird_flying:
-        # Release new bird
-        #bird_flying = True
-        mouse_pressed = False
+    if shoot == 2:
         if level.number_of_birds > 0:
             level.number_of_birds -= 1
             t1 = time.time() * 5000
