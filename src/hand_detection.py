@@ -9,7 +9,7 @@ low_yellow = np.array([20, 100, 100], np.uint8)
 high_yellow = np.array([30, 255, 255], np.uint8)
 
 
-def get_hand_position(frame, draw=True):
+def get_hand_position(frame, draw=True, mouse_pressed=False):
     kernel = np.ones((3, 3), np.uint8)
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -36,7 +36,7 @@ def get_hand_position(frame, draw=True):
 
     draw = True
 
-    #contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     x, y, area = 0, 0, 0
     for c in contours:
         area = cv2.contourArea(c)
@@ -100,10 +100,10 @@ def get_hand_position(frame, draw=True):
                 # ignore angles > 90 and ignore points very close to convex hull(they generally come due to noise)
                 if angle <= 90 and d > 30:
                     l += 1
-                    #cv2.circle(frame, far, 3, [255, 0, 0], -1)
+                    # cv2.circle(frame, far, 3, [255, 0, 0], -1)
 
                 # draw lines around hand
-                #cv2.line(frame, start, end, [0, 255, 0], 2)
+                # cv2.line(frame, start, end, [0, 255, 0], 2)
 
             l += 1
 
@@ -115,76 +115,16 @@ def get_hand_position(frame, draw=True):
                 else:
                     if arearatio < 12:  # PAra reconocer que no esta abierta
                         cv2.putText(frame, 'Arrastrando', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                        mouse_pressed = False
             elif l == 5:  # Para reconocer la mano abierta, aunque puede funcionar un simple else
                 cv2.putText(frame, 'Disparar', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
-            '''
-            if l==1:
-                if areacnt<2000:
-                    cv2.putText(frame,'Put hand in the box',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-                else:
-                    if arearatio<12:
-                        cv2.putText(frame,'0',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-                    elif arearatio<17.5:
-                        cv2.putText(frame,'Best and luck',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
+                mouse_pressed = True
 
-                    else:
-                        cv2.putText(frame,'1',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-
-            elif l==2:
-                cv2.putText(frame,'2',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-
-            elif l==3:
-
-                if arearatio<27:
-                        cv2.putText(frame,'3',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-                else:
-                        cv2.putText(frame,'ok',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-
-            elif l==4:
-                cv2.putText(frame,'4',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-
-            elif l==5:
-                cv2.putText(frame,'5',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-
-            elif l==6:
-                cv2.putText(frame,'reposition',(0,50), font, 2, (0,0,255), 3, cv2.LINE_AA)
-            else:
-            cv2.putText(frame,'reposition',(10,50), font, 2, (0,0,255), 3, cv2.LINE_AA)'''
-
-    """
-    frame_HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(frame_HSV, low_yellow, high_yellow)
- 
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    x, y, area = 0, 0, 0
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area > 3000:
-            M = cv2.moments(c)
-            if M["m00"] == 0:
-                M["m00"] = 1
-            x = int(M["m10"] / M["m00"])
-            y = int(M['m01'] / M['m00'])
-            if draw:
-                cv2.circle(frame, (x, y), 7, (255, 0, 0), 1)
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(frame, '{},{}'.format(x, y), (x + 10, y), font, 0.75, (0, 255, 0), 1, cv2.LINE_AA)
-                cv2.putText(frame, '{}'.format(area), (x + 10, y + 20), font, 0.75, (0, 255, 0), 1, cv2.LINE_AA)
-                new_contour = cv2.convexHull(c)
-                cv2.drawContours(frame, [new_contour], 0, (255, 0, 0), 3)
-
-        corners = cv2.goodFeaturesToTrack(mask, 40, 0.01, 10)
-        corners = np.int0(corners)
-
-        for i in corners:
-            x, y = i.ravel()
-            cv2.circle(frame, (x, y), 3, 255, -1)"""
-    # cv2.imshow('asdasd', frame)
-    cv2.imshow('frame', frame)
+    # cv2.imshow('frame', frame)
     cv2.imshow('mask', mask)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return
-    return x, y, area
+    return x, y, mouse_pressed
 
 
 def get_frame():
