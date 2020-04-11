@@ -328,7 +328,6 @@ level = Level(pigs, columns, beams, space)
 level.number = 0
 level.load_level()
 while running:
-    print('MArranitos', len(pigs))
     # Set mouse at the current centroid position
     frame = get_frame()
     x_mouse, y_mouse, shoot = get_hand_position(frame)
