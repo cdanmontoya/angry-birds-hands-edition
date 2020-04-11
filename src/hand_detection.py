@@ -112,14 +112,14 @@ def get_hand_position(frame):
                         shoot_bird = 1
                         count[0] = 1
             elif fingers == 3:
-                cv2.putText(frame, 'Avanzanr de nivel', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                cv2.putText(frame, 'Aceptar', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 shoot_bird = 4
             elif fingers == 5 and count == [1, 2]:  # Para reconocer la mano abierta
                 cv2.putText(frame, 'Disparando', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 count = [0, 0]
                 shoot_bird = 2
             else:
-                cv2.putText(frame, 'No detectado', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                cv2.putText(frame, 'Acción no detectada', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 count[1] = 2
 
     cv2.imshow('frame', frame)
