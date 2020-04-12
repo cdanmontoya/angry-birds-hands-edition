@@ -123,6 +123,7 @@ def get_hand_position(frame):
                 count[1] = 2
 
     cv2.imshow('frame', frame)
+    cv2.imshow('mask', mask)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return
     return x, y, shoot_bird

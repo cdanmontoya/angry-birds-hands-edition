@@ -360,8 +360,7 @@ while running:
         score = 0
         bird_path = []
         bonus_score_once = True
-
-    if shoot == 4 and len(birds) == 0 and len(pigs) != 0:
+    if shoot == 4 and game_state == 3:
         restart()
         level.load_level()
         game_state = 0
@@ -430,7 +429,6 @@ while running:
     # Draw pigs
     for pig in pigs:
         i += 1
-        # print (i,pig.life)
         pig = pig.shape
         if pig.body.position.y < 0:
             pigs_to_remove.append(pig)
