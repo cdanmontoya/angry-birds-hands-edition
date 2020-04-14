@@ -2,27 +2,31 @@ import cv2
 import math
 import numpy as np
 
+# Se instancia la cámara
 cap = cv2.VideoCapture(0)
 
 # Se define el intervalo de color que se va a detectar
+# Se define un trango para el color amarillo, ya que es el color del guante que vamos a usar
 low_yellow = np.array([20, 100, 100], np.uint8)
 high_yellow = np.array([30, 255, 255], np.uint8)
 count = [0, 0]          # Esta variable es como una doble bandera para definir las acciones que se realizan
 
 
 def get_hand_position(frame):
+    """
+        Este método recibe un frame capturado por la cámara a través de OpenCV,
+        la procesa para obtener la posición de una mano con un guante amarillo
+        y retorna las coordenadas del centroide
+    """
     global count
     shoot_bird = 0
     kernel = np.ones((3, 3), np.uint8)
 
+    # Pasamos la imagen al espacio de color HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # define el rango de color de piel en HSV
-    lower_skin = np.array([20, 100, 100], dtype=np.uint8)
-    upper_skin = np.array([30, 255, 255], dtype=np.uint8)
-
-    # extrae el color de piel de la imagen
-    mask = cv2.inRange(hsv, lower_skin, upper_skin)
+    # Crea la máscara de lo que detecte con el color previamente definido
+    mask = cv2.inRange(hsv, low_yellow, high_yellow)
 
     # Llena la imagen de la mano para evitar que tenga puntos negros
     mask = cv2.dilate(mask, kernel, iterations=1)
@@ -30,73 +34,92 @@ def get_hand_position(frame):
     # blur the image
     mask = cv2.GaussianBlur(mask, (5, 5), 100)
 
-    # encuentra los contornos
+    # encuentra los contornos de la mano
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Encuentra el contorno de area maxima(mano)
-    if len(contours) != 0:
-        cnt = max(contours, key=lambda x: cv2.contourArea(x))
-
+    # Se definen los valores iniciales del centroide y del area encerrada por el contorno
     x, y, area = 0, 0, 0
-    for c in contours:
-        area = cv2.contourArea(c)
+
+    if len(contours) != 0:
+        # Encontrar el contorno de area maxima(mano)
+        cnt = max(contours, key=lambda x: cv2.contourArea(x))
+        area = cv2.contourArea(cnt)
         if area > 3000:
-            M = cv2.moments(c)
+            # Obtener los momentos 
+            M = cv2.moments(cnt)
             if M["m00"] == 0:
                 M["m00"] = 1
+            
+            # Se calcula la posición del centroide a partir de los momentos obtenidos
             x = int(M["m10"] / M["m00"])
             y = int(M['m01'] / M['m00'])
+
+            # Se dibuja un circulo en donde está ubicado el centroide
             cv2.circle(frame, (x, y), 7, (255, 0, 0), 1)
+
+            # Se define la fuente de la letra con la que se escribirá en pantalla
             font = cv2.FONT_HERSHEY_SIMPLEX
+
+            # Se escribe en pantalla las coordenadas del centroide y el área encerrada por el contorno
             cv2.putText(frame, '{},{}'.format(x, y), (x + 10, y), font, 0.75, (0, 255, 0), 1, cv2.LINE_AA)
             cv2.putText(frame, '{}'.format(area), (x + 10, y + 20), font, 0.75, (0, 255, 0), 1, cv2.LINE_AA)
-            new_contour = cv2.convexHull(c)
+
+            # Se aplica encuentra un contorno convexo que encierre la mano 
+            # a partir del contorno obtenido de la máscara
+            new_contour = cv2.convexHull(cnt)
+            # Se dibuja el contorno convexo
             cv2.drawContours(frame, [new_contour], 0, (255, 0, 0), 3)
 
-        # approx the contour a little   --- ni puta idea de que hace exactamente
+        # permite realizar una pequeña aproximación al contorno de la mano
+        # así ser reducen ruidos
         epsilon = 0.0005 * cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, epsilon, True)
 
         # Hace una linea convexa alrededor de la mano
         hull = cv2.convexHull(cnt)
 
-        # define area of hull and area of hand
+        # Se define el área encerrada por el hull y de la mano
         areahull = cv2.contourArea(hull)
         areacnt = cv2.contourArea(cnt)
 
-        # find the percentage of area not covered by hand in convex hull
+        # Se encuentra el porcentaje del area que no está cubierta por la mano
         arearatio = ((areahull - areacnt) / areacnt) * 100
 
-        # find the defects in convex hull with respect to hand
+        # Se encuentran los defectos en el area convexa, estos son los huecos que hay entre los dedos
         hull = cv2.convexHull(approx, returnPoints=False)
         defects = cv2.convexityDefects(approx, hull)
 
         # fingers = numero de dedos
         fingers = 0
 
-        # code for finding no. of defects due to fingers
+        # Se encuentra el número de defectos debido a la separación de los dedos
         if defects is not None:
             for i in range(defects.shape[0]):
+                # Se definen las coordenadas de los defectos, dónde empiezan dónde terminen y eso
                 s, e, f, d = defects[i, 0]
                 start = tuple(approx[s][0])
                 end = tuple(approx[e][0])
                 far = tuple(approx[f][0])
                 pt = (100, 180)
 
-                # find length of all sides of triangle
+                # Se encuentran los tamaños de los lados del triángulo
                 a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
                 b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
                 c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
+
+                # Se calcula el semiperímetro del triángulo
                 s = (a + b + c) / 2
+
+                # Se aplica la fórmula de Herón para encontrar el área
                 ar = math.sqrt(s * (s - a) * (s - b) * (s - c))
 
-                # distance between point and convex hull
+                # Se calcula la distancia entre el punto y el area convexa
                 d = (2 * ar) / a
 
-                # apply cosine rule here
+                # Se aplica la regla del coseno
                 angle = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)) * 57
 
-                # ignore angles > 90 and ignore points very close to convex hull(they generally come due to noise)
+                # Se ignoran angulos mayores a 90 y defectos que estén muy cerca del área convexa (generalmente se deben a ruido)
                 if angle <= 90 and d > 30:
                     fingers += 1
             fingers += 1
@@ -122,13 +145,16 @@ def get_hand_position(frame):
                 cv2.putText(frame, 'Acción no detectada', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 count[1] = 2
 
+    # Se muestra la imagen resultante
     cv2.imshow('frame', frame)
-    cv2.imshow('mask', mask)
+    # cv2.imshow('mask', mask)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return
     return x, y, shoot_bird
 
-
 def get_frame():
+    """
+        Este método se encarga de realizar una captura usando la cámara 
+    """
     ret, frame = cap.read()
     return cv2.flip(frame, 1)
