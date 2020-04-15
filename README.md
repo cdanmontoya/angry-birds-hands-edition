@@ -1,32 +1,32 @@
-Angry Birds in Python
-=====================
-[Youtube Video](https://www.youtube.com/watch?v=B7G5JtCFepE&feature=youtu.be)
+# Angry Birds Hands Edition
 
-![Alt text](/resources/images/angry-birds-image.png?raw=true "angry-birds")
+Este juego es el resultado de adaptar el projecto [Angry Birds Python](https://github.com/estevaofon/angry-birds-python) para poder interactuar con él usando la cámara. Para esto se usan  técnicas de procesamiendo digital de imágenes usando OpenCV.
 
-Requirements
-------------
-```bash
-pip install pymunk pygame
-```
+En este [video de YouTube](https://www.youtube.com/watch?v=sY5y-LIGv_Q) se puede encontrar una explicación de las técnicas empleadas para detectar la posición y la postura de la mano.
 
-To play
--------
-1. Clone the project.
-2. Open the src folder.
-3. `python main.py`
+![Alt text](/resources/images/interfaz.png?raw=true "angry-birds")
 
-Zero Gravity
-------------
-![Alt text](/resources/images/gravity-zero.png?raw=true "angry-birds")
-* To activate the "zero gravity mode" press key s.
-* To back to normal mode press key n.
+# Requisitos
+Para ejecutar y jugar el juego es necesario tener un computador con una cámara conectada, y un guante de color amarillo para poder identificar la mano.
 
-Activate &  Deactivate the wall
--------------------------------
-![Alt text](/resources/images/walls.png?raw=true "angry-birds")
-* To activate or deactivate the wall press key w.
+# Pasos para ejecutar el proyecto
+1. Clonar el proyecto.
+2. Dirijirse al directorio del proyecto recién clonado.
+3. `pip3 install -r requirements.txt`
+4. `python3 src/main.py`
 
-Join the project
-----------------
-The project is Open Source. Feel free to contribute.
+# Instrucciones de uso
+Se debe usar un guante amarillo. Para poder interactuar con el juego, la mano debe aparecer en la imagen capturada por la cámara. Hay tres posturas que determinan qué acción se va a realizar
+1. Con la mano empuñada se apunta.
+2. Con la palma abierta, con los 5 dedos levantados, se dispara.
+3. Con tres dedos levantados se reinicia o se avanza de nivel.
+
+
+# Autores de la adaptación
+
+Desarrollado para el curso de Procesamiento Digital de Imágenes (2019-2), dictado por David Fernández (david.fernandez@udea.edu.co) en la [Universidad de Antioquia](http://udea.edu.co/), por 
+
+| Nombre | GitHub | Correo electrónico |
+|---|---| ---|
+|Jose David Tello Medina | [@joseda77](https://github.com/joseda77) |  jose.tello@udea.edu.co |
+| Carlos Daniel Montoya Hurtado | [@cdanmontoya](https://github.com/cdanmontoya) | carlos.montoyah@udea.edu.co |
