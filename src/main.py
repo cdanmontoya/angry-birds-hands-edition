@@ -1,60 +1,72 @@
+# Importar librerías
 import os
 import sys
 import math
 import time
 import pygame
-current_path = os.getcwd()
 import pymunk as pm
+
+# Importar las clases para instanciar en el juego
+# Tanto pajaros como niveles
 from characters import Bird
 from level import Level
 
+# Importar las utilidades para detectar la posición de la mano
+from hand_detection import get_frame
+from hand_detection import get_hand_position
 
-pygame.init()
-screen = pygame.display.set_mode((1200, 650))
+# Se define la ruta el directorio donde está el main
+os.chdir('./src')
+
+
+pygame.init() # Se inicializa el motor del juego
+screen = pygame.display.set_mode((1200, 650)) # Se define la dimensión de la pantalla de juego
 redbird = pygame.image.load(
-    "../resources/images/red-bird3.png").convert_alpha()
+    "../resources/images/red-bird3.png").convert_alpha() # Se carga el recurso de la imagen del pajarito
 background2 = pygame.image.load(
-    "../resources/images/background3.png").convert_alpha()
+    "../resources/images/background3.png").convert_alpha() # Se carga el recurso de la imagen del fondo
 sling_image = pygame.image.load(
-    "../resources/images/sling-3.png").convert_alpha()
+    "../resources/images/sling-3.png").convert_alpha() # Se carga el recurso de la imagen de la resortera
 full_sprite = pygame.image.load(
-    "../resources/images/full-sprite.png").convert_alpha()
-rect = pygame.Rect(181, 1050, 50, 50)
-cropped = full_sprite.subsurface(rect).copy()
-pig_image = pygame.transform.scale(cropped, (30, 30))
+    "../resources/images/full-sprite.png").convert_alpha() # Se carga el recurso de la imagen de todos los sprites
+rect = pygame.Rect(181, 1050, 50, 50) # Se define un rectángulo con la posición del sprite que se desea
+cropped = full_sprite.subsurface(rect).copy() # Se recorta el sprite del cerdito
+pig_image = pygame.transform.scale(cropped, (30, 30)) # Se ajusta la imagen del cerdito
 buttons = pygame.image.load(
-    "../resources/images/selected-buttons.png").convert_alpha()
+    "../resources/images/selected-buttons.png").convert_alpha() # Se carga el recurso de los botones 
 pig_happy = pygame.image.load(
-    "../resources/images/pig_failed.png").convert_alpha()
+    "../resources/images/pig_failed.png").convert_alpha() # Se carga el recurso de la imagen del cerdito contento, que se muestra cuando se falla un nivel
 stars = pygame.image.load(
-    "../resources/images/stars-edited.png").convert_alpha()
-rect = pygame.Rect(0, 0, 200, 200)
-star1 = stars.subsurface(rect).copy()
-rect = pygame.Rect(204, 0, 200, 200)
-star2 = stars.subsurface(rect).copy()
-rect = pygame.Rect(426, 0, 200, 200)
-star3 = stars.subsurface(rect).copy()
-rect = pygame.Rect(164, 10, 60, 60)
-pause_button = buttons.subsurface(rect).copy()
-rect = pygame.Rect(24, 4, 100, 100)
-replay_button = buttons.subsurface(rect).copy()
-rect = pygame.Rect(142, 365, 130, 100)
-next_button = buttons.subsurface(rect).copy()
-clock = pygame.time.Clock()
-rect = pygame.Rect(18, 212, 100, 100)
-play_button = buttons.subsurface(rect).copy()
-clock = pygame.time.Clock()
-running = True
-# the base of the physics
-space = pm.Space()
-space.gravity = (0.0, -700.0)
-pigs = []
-birds = []
-balls = []
-polys = []
+    "../resources/images/stars-edited.png").convert_alpha() # Se carga el recurso de la imagen de las estrellas, que se muestran al finalizar un nivel
+rect = pygame.Rect(0, 0, 200, 200)      # Se define un rectángulo para recortar la primera estrella
+star1 = stars.subsurface(rect).copy()   # Se recorta la primera estrella
+rect = pygame.Rect(204, 0, 200, 200)    # Se define un rectángulo para recortar la segunda estrella
+star2 = stars.subsurface(rect).copy()   # Se recorta la segunda estrella
+rect = pygame.Rect(426, 0, 200, 200)    # Se define un rectángulo para recortar la tercera estrella
+star3 = stars.subsurface(rect).copy()   # Se recorta la tercera estrella
+rect = pygame.Rect(164, 10, 60, 60)     # Se define un rectángulo para recortar el botón de pausa
+pause_button = buttons.subsurface(rect).copy()  # Se recorta el botón de pausa
+rect = pygame.Rect(24, 4, 100, 100)     # Se define un rectángulo para recortar el botón de reiniciar
+replay_button = buttons.subsurface(rect).copy() # Se recorta el botón de reiniciar
+rect = pygame.Rect(142, 365, 130, 100)  # Se define un rectángulo para recortar el botón de siguiente nivel
+next_button = buttons.subsurface(rect).copy()   # Se recorta el botón de siguiente
+rect = pygame.Rect(18, 212, 100, 100)   # Se define un rectángulo para recortar el botón de jugar
+play_button = buttons.subsurface(rect).copy()   # Se recorta el botón de jugar
+clock = pygame.time.Clock()             # Se inicializa un timer que permite visualizar las actualizaciones del juego
+running = True                          # Se define una bandera que servirá para correr el juego en un ciclo while
+
+
+# INICIALIZACIÓN DE VARIABLES NECESARIAS PARA MANEJAR LAS MECÁNICAS DEL JUEGO
+
+space = pm.Space()                                          # Se crea una instancia del espacio de pygame
+space.gravity = (0.0, -700.0)                               # Se añade gravedad
+pigs = []                                                   # lista de cerdos
+birds = []                                                  # lista de pajaritos
+balls = []                                                  
+polys = []                                                  # lista de poligonos que están repartidos en el espacio
 beams = []
-columns = []
-poly_points = []
+columns = []                                                
+poly_points = []                                            
 ball_number = 0
 polys_dict = {}
 mouse_distance = 0
@@ -68,10 +80,10 @@ t1 = 0
 tick_to_next_circle = 10
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-BLACK = (0, 0, 0)
+BLACK = (0, 0, 0)                       
 WHITE = (255, 255, 255)
-sling_x, sling_y = 135, 450
-sling2_x, sling2_y = 160, 450
+sling_x, sling_y = 135, 450                                    # Posición en reposo de la resortera
+sling2_x, sling2_y = 160, 450                                  
 score = 0
 game_state = 0
 bird_path = []
@@ -100,7 +112,7 @@ space.add(static_lines)
 
 def to_pygame(p):
     """Convert pymunk to pygame coordinates"""
-    return int(p.x), int(-p.y+600)
+    return int(p.x), int(-p.y + 600)
 
 
 def vector(p0, p1):
@@ -114,7 +126,7 @@ def vector(p0, p1):
 def unit_vector(v):
     """Return the unit vector of the points
     v = (a,b)"""
-    h = ((v[0]**2)+(v[1]**2))**0.5
+    h = ((v[0] ** 2) + (v[1] ** 2)) ** 0.5
     if h == 0:
         h = 0.000000000000001
     ua = v[0] / h
@@ -144,29 +156,34 @@ def sling_action():
     global angle
     global x_mouse
     global y_mouse
-    # Fixing bird to the sling rope
-    v = vector((sling_x, sling_y), (x_mouse, y_mouse))
+    # Se crea un vector entre la posición de la resortera y del centroide de la mano
+    v = vector((135, 450), (x_mouse, y_mouse))
+    # se normaliza el vector
     uv = unit_vector(v)
     uv1 = uv[0]
     uv2 = uv[1]
-    mouse_distance = distance(sling_x, sling_y, x_mouse, y_mouse)
-    pu = (uv1*rope_lenght+sling_x, uv2*rope_lenght+sling_y)
+    # se calcula la distancia entre el centroide de la mano, determinado por x_mouse y y_mouse
+    mouse_distance = distance(135, 450, x_mouse, y_mouse)  # / 800 * 120
+    #
+    pu = (uv1 * rope_lenght + sling_x, uv2 * rope_lenght + sling_y)
     bigger_rope = 102
     x_redbird = x_mouse - 20
     y_redbird = y_mouse - 20
+
+    # Se verifica si la resortera no se puede estirar mas
     if mouse_distance > rope_lenght:
         pux, puy = pu
         pux -= 20
         puy -= 20
         pul = pux, puy
         screen.blit(redbird, pul)
-        pu2 = (uv1*bigger_rope+sling_x, uv2*bigger_rope+sling_y)
+        pu2 = (uv1 * bigger_rope + sling_x, uv2 * bigger_rope + sling_y)
         pygame.draw.line(screen, (0, 0, 0), (sling2_x, sling2_y), pu2, 5)
         screen.blit(redbird, pul)
         pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y), pu2, 5)
     else:
         mouse_distance += 10
-        pu3 = (uv1*mouse_distance+sling_x, uv2*mouse_distance+sling_y)
+        pu3 = (uv1 * mouse_distance + sling_x, uv2 * mouse_distance + sling_y)
         pygame.draw.line(screen, (0, 0, 0), (sling2_x, sling2_y), pu3, 5)
         screen.blit(redbird, (x_redbird, y_redbird))
         pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y), pu3, 5)
@@ -175,7 +192,7 @@ def sling_action():
     dx = x_mouse - sling_x
     if dx == 0:
         dx = 0.00000000000001
-    angle = math.atan((float(dy))/dx)
+    angle = math.atan((float(dy)) / dx)
 
 
 def draw_level_cleared():
@@ -187,15 +204,15 @@ def draw_level_cleared():
     score_level_cleared = bold_font2.render(str(score), 1, WHITE)
     if level.number_of_birds >= 0 and len(pigs) == 0:
         if bonus_score_once:
-            score += (level.number_of_birds-1) * 10000
+            score += (level.number_of_birds - 1) * 10000
         bonus_score_once = False
         game_state = 4
         rect = pygame.Rect(300, 0, 600, 800)
         pygame.draw.rect(screen, BLACK, rect)
         screen.blit(level_cleared, (450, 90))
-        if score >= level.one_star and score <= level.two_star:
+        if level.one_star <= score <= level.two_star:
             screen.blit(star1, (310, 190))
-        if score >= level.two_star and score <= level.three_star:
+        if level.two_star <= score <= level.three_star:
             screen.blit(star1, (310, 190))
             screen.blit(star2, (500, 170))
         if score >= level.three_star:
@@ -211,7 +228,7 @@ def draw_level_failed():
     """Draw level failed"""
     global game_state
     failed = bold_font3.render("Level Failed", 1, WHITE)
-    if level.number_of_birds <= 0 and time.time() - t2 > 5 and len(pigs) > 0:
+    if level.number_of_birds <= 0 < len(pigs) and time.time() - t2 > 5:
         game_state = 3
         rect = pygame.Rect(300, 0, 600, 800)
         pygame.draw.rect(screen, BLACK, rect)
@@ -250,7 +267,7 @@ def restart():
 
 def post_solve_bird_pig(arbiter, space, _):
     """Collision between bird and pig"""
-    surface=screen
+    surface = screen
     a, b = arbiter.shapes
     bird_body = a.body
     pig_body = b.body
@@ -309,127 +326,113 @@ def post_solve_pig_wood(arbiter, space, _):
         pigs.remove(pig)
 
 
+# Se agregan los handlers de las colisiones al espacio
 # bird and pigs
-space.add_collision_handler(0, 1).post_solve=post_solve_bird_pig
+space.add_collision_handler(0, 1).post_solve = post_solve_bird_pig
 # bird and wood
-space.add_collision_handler(0, 2).post_solve=post_solve_bird_wood
+space.add_collision_handler(0, 2).post_solve = post_solve_bird_wood
 # pig and wood
-space.add_collision_handler(1, 2).post_solve=post_solve_pig_wood
-load_music()
+space.add_collision_handler(1, 2).post_solve = post_solve_pig_wood
+# load_music()
+
+# Se inicializan los niveles
 level = Level(pigs, columns, beams, space)
 level.number = 0
 level.load_level()
 
+# Se inicia el ciclo principal del juego
 while running:
-    # Input handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            running = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-            # Toggle wall
-            if wall:
-                space.remove(static_lines1)
-                wall = False
-            else:
-                space.add(static_lines1)
-                wall = True
+    # Set mouse at the current centroid position
+    frame = get_frame()
 
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-            space.gravity = (0.0, -10.0)
-            level.bool_space = True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
-            space.gravity = (0.0, -700.0)
-            level.bool_space = False
-        if (pygame.mouse.get_pressed()[0] and x_mouse > 100 and
-                x_mouse < 250 and y_mouse > 370 and y_mouse < 550):
-            mouse_pressed = True
-        if (event.type == pygame.MOUSEBUTTONUP and
-                event.button == 1 and mouse_pressed):
-            # Release new bird
-            mouse_pressed = False
-            if level.number_of_birds > 0:
-                level.number_of_birds -= 1
-                t1 = time.time()*1000
-                xo = 154
-                yo = 156
-                if mouse_distance > rope_lenght:
-                    mouse_distance = rope_lenght
-                if x_mouse < sling_x+5:
-                    bird = Bird(mouse_distance, angle, xo, yo, space)
-                    birds.append(bird)
-                else:
-                    bird = Bird(-mouse_distance, angle, xo, yo, space)
-                    birds.append(bird)
-                if level.number_of_birds == 0:
-                    t2 = time.time()
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if (x_mouse < 60 and y_mouse < 155 and y_mouse > 90):
-                game_state = 1
-            if game_state == 1:
-                if x_mouse > 500 and y_mouse > 200 and y_mouse < 300:
-                    # Resume in the paused screen
-                    game_state = 0
-                if x_mouse > 500 and y_mouse > 300:
-                    # Restart in the paused screen
-                    restart()
-                    level.load_level()
-                    game_state = 0
-                    bird_path = []
-            if game_state == 3:
-                # Restart in the failed level screen
-                if x_mouse > 500 and x_mouse < 620 and y_mouse > 450:
-                    restart()
-                    level.load_level()
-                    game_state = 0
-                    bird_path = []
-                    score = 0
-            if game_state == 4:
-                # Build next level
-                if x_mouse > 610 and y_mouse > 450:
-                    restart()
-                    level.number += 1
-                    game_state = 0
-                    level.load_level()
-                    score = 0
-                    bird_path = []
-                    bonus_score_once = True
-                if x_mouse < 610 and x_mouse > 500 and y_mouse > 450:
-                    # Restart in the level cleared screen
-                    restart()
-                    level.load_level()
-                    game_state = 0
-                    bird_path = []
-                    score = 0
-    x_mouse, y_mouse = pygame.mouse.get_pos()
+    # Se obtiene el tipo de postura de la mano y su centroide
+    x_mouse, y_mouse, shoot = get_hand_position(frame)
+
+    # Se escalan los valores del centroide para mejorar las mecánicas y la interacción
+    x_mouse = 40 + ((x_mouse * 190) / 600)
+    y_mouse = 150 + ((y_mouse * 400) / 460)
+
+    # Realiza la acción de disparar si detecta que la mano está abierta
+    if shoot == 2:
+        # Se verifica que aún se tengan pajaritos para disparar
+        if level.number_of_birds > 0:
+            # Se reduce en 1 la cantidad de pajaritos disponibles
+            level.number_of_birds -= 1
+            t1 = time.time() * 5000
+            xo = 154
+            yo = 156
+            if mouse_distance > rope_lenght:
+                mouse_distance = rope_lenght
+            # Si el pajarito está un poco a la izquiera de la resortera, lo dispara hacia la derecha
+            if x_mouse < sling_x + 5:
+                bird = Bird(mouse_distance, angle, xo, yo, space)
+                birds.append(bird)
+            # Si no, lo dispara hacia la izquierda
+            else:
+                bird = Bird(-mouse_distance, angle, xo, yo, space)
+                birds.append(bird)
+            if level.number_of_birds == 0:
+                # Se usa este timer para determinar si, al haber disparado los pajaritos, no se logró completar el nivel
+                t2 = time.time()
+
+    # Carga el siguiente nivel si se acabaron con todos los cerditos
+    # Y que la postura de la mano sea de tres dedos levantados
+    if shoot == 4 and len(pigs) == 0:
+        # Build next level
+        restart()
+        level.number += 1
+        game_state = 0
+        level.load_level()
+        score = 0
+        bird_path = []
+        bonus_score_once = True
+    
+    # Reinicia el nivel si el estado del juego es que se falló el nivel
+    # Y que la postura de la mano sea de tres dedos levantados
+    if shoot == 4 and game_state == 3:
+        restart()
+        level.load_level()
+        game_state = 0
+        bird_path = []
+        score = 0
+
     # Draw background
     screen.fill((130, 200, 100))
     screen.blit(background2, (0, -50))
+
     # Draw first part of the sling
     rect = pygame.Rect(50, 0, 70, 220)
     screen.blit(sling_image, (138, 420), rect)
+
     # Draw the trail left behind
     for point in bird_path:
         pygame.draw.circle(screen, WHITE, point, 5, 0)
+
     # Draw the birds in the wait line
     if level.number_of_birds > 0:
-        for i in range(level.number_of_birds-1):
-            x = 100 - (i*35)
+        for i in range(level.number_of_birds - 1):
+            x = 100 - (i * 35)
             screen.blit(redbird, (x, 508))
+
     # Draw sling behavior
-    if mouse_pressed and level.number_of_birds > 0:
+    if level.number_of_birds > 0:
         sling_action()
     else:
-        if time.time()*1000 - t1 > 300 and level.number_of_birds > 0:
+        # Monta un nuevo pajarito en la resortera, si aún queda pájaros
+        if time.time() * 1000 - t1 > 300 and level.number_of_birds > 0:
             screen.blit(redbird, (130, 426))
+        # Sino, dibuja una línea
         else:
-            pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y-8),
-                             (sling2_x, sling2_y-7), 5)
+            pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y - 8),
+                             (sling2_x, sling2_y - 7), 5)
+
+    # Se definen listas para remover los elementos según sus interacciones
     birds_to_remove = []
     pigs_to_remove = []
     counter += 1
     # Draw birds
+    # Se recorre cada uno de los pajaritos y se obtiene su posición 
+    # para poder actualizarlo en la pantalla
     for bird in birds:
         if bird.shape.body.position.y < 0:
             birds_to_remove.append(bird)
@@ -447,6 +450,7 @@ while running:
         counter = 0
         restart_counter = False
     # Remove birds and pigs
+    # Se recorren las listas de pajaritos y cerdos a borrar, esto se actualiza en las colisiones
     for bird in birds_to_remove:
         space.remove(bird.shape, bird.shape.body)
         birds.remove(bird)
@@ -462,22 +466,23 @@ while running:
         p2 = to_pygame(pv2)
         pygame.draw.lines(screen, (150, 150, 150), False, [p1, p2])
     i = 0
-    # Draw pigs
+    # Se recorren los cerditos para dibujarlos
     for pig in pigs:
         i += 1
-        # print (i,pig.life)
         pig = pig.shape
         if pig.body.position.y < 0:
             pigs_to_remove.append(pig)
 
+        # Se define la posición del cerdito
         p = to_pygame(pig.body.position)
         x, y = p
 
+        # Se rota el cerdito según vaya rodando
         angle_degrees = math.degrees(pig.body.angle)
         img = pygame.transform.rotate(pig_image, angle_degrees)
-        w,h = img.get_size()
-        x -= w*0.5
-        y -= h*0.5
+        w, h = img.get_size()
+        x -= w * 0.5
+        y -= h * 0.5
         screen.blit(img, (x, y))
         pygame.draw.circle(screen, BLUE, p, int(pig.radius), 2)
     # Draw columns and Beams
@@ -486,9 +491,9 @@ while running:
     for beam in beams:
         beam.draw_poly('beams', screen)
     # Update physics
-    dt = 1.0/50.0/2.
+    dt = 1.0 / 50.0 / 2.
     for x in range(2):
-        space.step(dt) # make two updates per frame for better stability
+        space.step(dt)  # make two updates per frame for better stability
     # Drawing second part of the sling
     rect = pygame.Rect(0, 0, 60, 200)
     screen.blit(sling_image, (120, 420), rect)
